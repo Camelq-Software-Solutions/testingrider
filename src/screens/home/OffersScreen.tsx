@@ -7,22 +7,10 @@ import { Layout } from '../../constants/Layout';
 export default function OffersScreen({ navigation }: any) {
   const offers = [
     {
-      id: 1,
-      title: '20% Off Your Next Ride',
-      description: 'Use code RIDE20 to get 20% off your next ride. Valid for all users.',
-      expires: 'Expires: 30 June 2024',
-    },
-    {
       id: 2,
       title: 'Refer & Earn',
       description: 'Refer a friend and both of you get $5 ride credit after their first trip.',
       expires: 'No expiry',
-    },
-    {
-      id: 3,
-      title: 'Weekend Special',
-      description: 'Flat $3 off on all rides this weekend. No code needed!',
-      expires: 'Expires: Sunday, 11:59 PM',
     },
   ];
 

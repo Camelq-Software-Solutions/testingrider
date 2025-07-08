@@ -37,6 +37,12 @@ import SettingsScreen from '../screens/profile/SettingsScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import PersonalDetailsScreen from '../screens/profile/PersonalDetailsScreen';
 import AboutScreen from '../screens/profile/AboutScreen';
+import PrivacyPolicyScreen from '../screens/profile/PrivacyPolicyScreen';
+import PrivacySecurityScreen from '../screens/profile/PrivacySecurityScreen';
+import TermsOfPolicyScreen from '../screens/profile/TermsOfPolicyScreen';
+import HelpCenterScreen from '../screens/profile/HelpCenterScreen';
+import ChatBotScreen from '../screens/profile/ChatBotScreen';
+import RateAppScreen from '../screens/profile/RateAppScreen';
 
 // Support Screens
 import HelpSupportScreen from '../screens/support/HelpSupportScreen';
@@ -122,6 +128,12 @@ function MainNavigator() {
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="PersonalDetails" component={PersonalDetailsScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="PrivacySecurity" component={PrivacySecurityScreen} />
+      <Stack.Screen name="TermsOfPolicy" component={TermsOfPolicyScreen} />
+      <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
+      <Stack.Screen name="ChatBot" component={ChatBotScreen} />
+      <Stack.Screen name="RateApp" component={RateAppScreen} />
     </Stack.Navigator>
   );
 }

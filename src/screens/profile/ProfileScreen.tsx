@@ -204,7 +204,7 @@ export default function ProfileScreen({ navigation, route }: any) {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>₹2,340</Text>
-              <Text style={styles.statLabel}>Total Spent</Text>
+              <Text style={styles.statLabel}>Total Earnings</Text>
             </View>
           </View>
         </Animated.View>
@@ -265,12 +265,6 @@ export default function ProfileScreen({ navigation, route }: any) {
         <Animated.View style={[styles.quickActions, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionGrid}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('ScheduleRide')} activeOpacity={0.7}>
-              <View style={styles.actionIcon}>
-                <Ionicons name="time" size={24} color={Colors.primary} />
-              </View>
-              <Text style={styles.actionText}>Schedule Ride</Text>
-            </TouchableOpacity>
             <TouchableOpacity 
               style={styles.actionButton}
               onPress={() => navigation.navigate('RideHistory')}
@@ -281,7 +275,7 @@ export default function ProfileScreen({ navigation, route }: any) {
               </View>
               <Text style={styles.actionText}>Ride History</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.getParent()?.navigate('Offers')} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Offers')} activeOpacity={0.7}>
               <View style={styles.actionIcon}>
                 <Ionicons name="gift" size={24} color={Colors.coral} />
               </View>
