@@ -13,6 +13,7 @@ import Polyline from '@mapbox/polyline';
 import { useUser, useAuth } from '@clerk/clerk-expo';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAssignUserType } from '../../utils/helpers';
+import * as Location from 'expo-location';
 
 const { width, height } = Dimensions.get('window');
 
@@ -839,6 +840,7 @@ export default function HomeScreen() {
   const rippleAnim = useRef(new Animated.Value(0)).current;
   const [isSwiping, setIsSwiping] = useState(false);
   const pulseAnim = useRef(new Animated.Value(0)).current;
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -1116,6 +1118,30 @@ export default function HomeScreen() {
     }
   };
 
+  // Add this handler in HomeScreen
+  const handleCurrentLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required to fetch your current location.');
+        return;
+      }
+      let loc = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+        latitudeDelta: 0.01, // Zoom in more
+        longitudeDelta: 0.01, // Zoom in more
+      };
+      // Animate map to new region
+      if (mapRef.current) {
+        mapRef.current.animateToRegion(coords, 1000);
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to fetch current location.');
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom', 'left', 'right']}>
       {/* StatusBar background fix for edge-to-edge */}
@@ -1123,6 +1149,7 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" translucent />
       {/* Map */}
       <MapView
+        ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={{
           latitude: 17.4375, // Example: Hyderabad
@@ -1136,6 +1163,47 @@ export default function HomeScreen() {
         rotateEnabled={isOnline}
         pitchEnabled={isOnline}
       />
+      {/* Top Bar Overlay (always visible, even offline) */}
+      <Animated.View
+        style={[
+          styles.topBar,
+          {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            elevation: 10,
+            backgroundColor: 'rgba(255,255,255,0.96)',
+            borderRadius: 18,
+            margin: 16,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            alignSelf: 'center',
+            width: '92%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'absolute',
+            top: insets.top + 8,
+            left: 0,
+            right: 0,
+            zIndex: 2000, // ensure always on top
+          },
+        ]}
+      >
+        <TouchableOpacity style={styles.menuButton} onPress={() => setMenuVisible(true)}>
+            <Entypo name="menu" size={28} color="#222" />
+            <View style={styles.badge}><Text style={styles.badgeText}>1</Text></View>
+          </TouchableOpacity>
+        <View style={styles.speedPill}>
+          <Text style={styles.speedZero}>0</Text>
+          <Text style={styles.speedZero}> | </Text>
+          <Text style={styles.speedLimit}>80</Text>
+        </View>
+        <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('Profile')}>
+          <Ionicons name="person-circle" size={32} color="#222" />
+          </TouchableOpacity>
+      </Animated.View>
       {/* Overall Offline Overlay */}
       {!isOnline && !isRideActive && !showOfflineScreen && (
         <View
@@ -1335,44 +1403,10 @@ export default function HomeScreen() {
           </Animated.Text>
         </TouchableOpacity>
       )}
-      {/* Top Bar Overlay */}
-      <Animated.View
-        style={[
-          styles.topBar,
-          {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.12,
-            shadowRadius: 12,
-            elevation: 10,
-            backgroundColor: 'rgba(255,255,255,0.96)',
-            borderRadius: 18,
-            margin: 16,
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            alignSelf: 'center',
-            width: '92%',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          },
-        ]}
-      >
-        <TouchableOpacity style={styles.menuButton} onPress={() => setMenuVisible(true)}>
-            <Entypo name="menu" size={28} color="#222" />
-            <View style={styles.badge}><Text style={styles.badgeText}>1</Text></View>
-          </TouchableOpacity>
-        <View style={styles.speedPill}>
-          <Text style={styles.speedZero}>0</Text>
-          <Text style={styles.speedZero}> | </Text>
-          <Text style={styles.speedLimit}>80</Text>
-        </View>
-        <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('Profile')}>
-          <Ionicons name="person-circle" size={32} color="#222" />
-          </TouchableOpacity>
-      </Animated.View>
-      {/* Center Marker */}
-      <Animated.View
+      {/* Center Marker (fetches current location on press) */}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={handleCurrentLocation}
         style={{
           position: 'absolute',
           top: '48%',
@@ -1389,7 +1423,7 @@ export default function HomeScreen() {
         }}
       >
         <MaterialIcons name="navigation" size={32} color="#222" style={{ transform: [{ rotate: '0deg' }] }} />
-      </Animated.View>
+      </TouchableOpacity>
       {/* Bottom Online/Offline Bar */}
       <SafeAreaView style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: 'transparent', paddingBottom: insets.bottom > 0 ? insets.bottom : 16, zIndex: 10000 }} edges={['bottom']}>
         {isOnline && !isRideActive && !navigationRide && !rideRequest && !showOtp && !rideInProgress && (
@@ -1712,6 +1746,30 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+      {/* Location Icon Button (right middle corner) */}
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          right: 20,
+          top: height / 2 - 30,
+          backgroundColor: '#fff',
+          borderRadius: 24,
+          width: 48,
+          height: 48,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          elevation: 8,
+          zIndex: 1500,
+        }}
+        onPress={handleCurrentLocation}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="locate" size={28} color="#1877f2" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

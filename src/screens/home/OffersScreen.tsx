@@ -1,10 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, TITLE_COLOR } from '../../constants/Colors';
 import { Layout } from '../../constants/Layout';
+import { useUser } from '@clerk/clerk-expo';
 
 export default function OffersScreen({ navigation }: any) {
+  const { user } = useUser();
+
+  // Helper to get first 4 letters of name (uppercased, pad if needed)
+  const getNamePart = () => {
+    const name = user?.firstName || user?.fullName || 'USER';
+    return name.substring(0, 4).toUpperCase().padEnd(4, 'X');
+  };
+  // Helper to get last 4 digits of phone number
+  const getPhonePart = () => {
+    const phone = user?.primaryPhoneNumber?.phoneNumber || '';
+    const digits = phone.replace(/\D/g, '');
+    return digits.slice(-4).padStart(4, '0');
+  };
+  const referralCode = `${getNamePart()}${getPhonePart()}`;
+
   const offers = [
     {
       id: 2,
@@ -13,6 +29,16 @@ export default function OffersScreen({ navigation }: any) {
       expires: 'No expiry',
     },
   ];
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Use my referral code ${referralCode} to sign up and get rewards on your first ride! Download the app now.`,
+      });
+    } catch (error) {
+      // Optionally handle error
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -26,8 +52,19 @@ export default function OffersScreen({ navigation }: any) {
       <View style={styles.content}>
         {offers.map((offer) => (
           <View key={offer.id} style={styles.offerCard}>
-            <Text style={styles.offerTitle}>{offer.title}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={styles.offerTitle}>{offer.title}</Text>
+              {/* Share button */}
+              <TouchableOpacity onPress={handleShare} accessibilityLabel="Share Referral Code">
+                <Ionicons name="share-social-outline" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
             <Text style={styles.offerDescription}>{offer.description}</Text>
+            {/* Referral code section */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+              <Text style={{ fontWeight: 'bold', color: Colors.primary, fontSize: 16, marginRight: 8 }}>Your Code:</Text>
+              <Text style={{ fontFamily: 'monospace', fontSize: 16, backgroundColor: Colors.gray100, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>{referralCode}</Text>
+            </View>
             <Text style={styles.offerExpires}>{offer.expires}</Text>
           </View>
         ))}
